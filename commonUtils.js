@@ -109,13 +109,14 @@ defineModule({
         };
 
         that.memoize = function (target) {
-            return function memoizer() {
+            var memoizer = function() {
                 if (memoizer.result) {
                     return memoizer.result
                 } else {
                     return memoizer.result = target.apply(target, arguments);
                 }
-            }
+            };
+            return memoizer;
         };
 
         return that;
