@@ -1,12 +1,24 @@
-defineModule({
-    name:'utils',
-    category:'river',
-    description:'Various utilities'
-}, function (that) {
+defineModule(function (that) {
 
     that.array = ArrayUtils();
     that['function'] = FunctionUtils();
     that.object = ObjectUtils();
+
+    that.Collection = (function(commonUtils) {
+        return function(that) {
+            that = that || [];
+            that.find = function(opt) {
+                return commonUtils.array.find(that, opt);
+            }
+            return that;
+        }
+    }(that));
+
+    that.jasmineSpecs = [
+        'specs/CollectionSpec.js'
+    ]
+
+
 
 
     function ObjectUtils() {
@@ -127,7 +139,17 @@ defineModule({
         "use strict";
         var that = {};
 
-        that.find = function (arr, func) {
+        that.find = function (arr, opt) {
+            var func;
+            if(typeof opt === 'object') {
+                func = function(it) {
+                    return Object.keys(opt).every(function(key) {
+                        return it[key] === opt[key];
+                    });
+                }
+            } else {
+                func = opt;
+            }
             for (var i = arr.length; i--;) {
                 if (func(arr[i])) {
                     return arr[i];
