@@ -1,8 +1,9 @@
 defineModule(function (that) {
 
-    that.array = ArrayUtils();
-    that['function'] = FunctionUtils();
-    that.object = ObjectUtils();
+    that.Array = that.array = ArrayUtils();
+    that.Function = that['function'] = FunctionUtils();
+    that.Object = that.object = ObjectUtils();
+
 
     that.Collection = (function(commonUtils) {
         return function(that) {
@@ -15,7 +16,8 @@ defineModule(function (that) {
     }(that));
 
     that.jasmineSpecs = [
-        'specs/CollectionSpec.js'
+        'specs/CollectionSpec.js',
+        'specs/FunctionSpec.js'
     ]
 
 
@@ -83,14 +85,47 @@ defineModule(function (that) {
         "use strict";
         var that = {};
 
+        /**
+         * Queues functions and ensures they are run no more frequently than delay milliseconds
+         * @type {*}
+         */
+        that.functionQueue = function (delay) {
+            var queue = [];
+            queue.add = function (func) {
+                queue.push(function () {
+                    func();
+                    setTimeout(queue.next, delay);
+                });
+                queue.length === 1 && setTimeout(queue.next,0);
+            };
+            queue.next = function () {
+                queue.length && queue.shift()();
+            }
+            return queue;
+        };
+
+
+
+        /**
+         * ensure that target is not called more often than milli milliseconds after optional delay
+         * @param target
+         * @param milli
+         * @param delay
+         * @return {Function}
+         */
         that.bounceProtect = function (target, milli, delay) {
+            target.bounceProtect = {};
             return function () {
-                if (!target.alreadyCalled) {
-                    target.alreadyCalled = true;
+                var bounceProtect = target.bounceProtect;
+                bounceProtect.called = true;
+                if (!bounceProtect.alreadyCalled) {
+                    bounceProtect.alreadyCalled = true;
                     !delay && target();
                     setTimeout(function () {
                         delay && target();
-                        target.alreadyCalled = false;
+                        bounceProtect.alreadyCalled = false;
+                        bounceProtect.called && target();
+                        bounceProtect.called = false;
                     }, milli);
                 }
             }
