@@ -3,6 +3,7 @@ defineModule(function (that) {
     that.Array = that.array = ArrayUtils();
     that.Function = that['function'] = FunctionUtils();
     that.Object = that.object = ObjectUtils();
+    that.File = FileUtils();
 
 
     that.Collection = (function(commonUtils) {
@@ -18,7 +19,39 @@ defineModule(function (that) {
     that.jasmineSpecs = [
         'specs/CollectionSpec.js',
         'specs/FunctionSpec.js'
-    ]
+    ];
+
+    function FileUtils() {
+
+        var kb = 1024;
+        var mb = kb * 1024;
+        var gb = mb * 1024;
+        var tb = gb * 1024;
+
+
+        var that = {};
+
+        that.fileSize = function(bytes) {
+                if (bytes > tb) {
+                    return round(bytes / tb) + ' TB';
+                }
+                if (bytes > gb) {
+                    return round(bytes / gb) + ' GB';
+                }
+                if (bytes > mb) {
+                    return round(bytes / mb) + ' MB';
+                }
+                return round(bytes / kb) + ' KB';
+
+                function round(num) {
+                    return Math.round(num * 10) / 10;
+                }
+        };
+
+        return that;
+    }
+
+
 
 
 
